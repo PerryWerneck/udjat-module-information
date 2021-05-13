@@ -21,16 +21,17 @@
  #include <udjat/module.h>
  #include <udjat/worker.h>
  #include <udjat/request.h>
+ #include <udjat/factory.h>
 
  using namespace Udjat;
  using namespace std;
 
- class Module : public Udjat::Module, public Udjat::Worker {
+ class InfoModule : public Udjat::Module, public Udjat::Worker {
  private:
 
  public:
 
- 	Module() : Udjat::Module(Quark::getFromStatic("information")), Udjat::Worker(Quark::getFromStatic("info")) {
+ 	InfoModule() : Udjat::Module(Quark::getFromStatic("information")), Udjat::Worker(Quark::getFromStatic("info")) {
 
 		static const Udjat::ModuleInfo info{
 			PACKAGE_NAME,									// The module name.
@@ -41,14 +42,29 @@
 		};
 
 		this->Udjat::Module::info = this->Udjat::Worker::info = &info;
+		active = true; // This worker is always active.
 
  	};
 
- 	virtual ~Module() {
+ 	virtual ~InfoModule() {
  	}
 
-	void work(const Request &request, Response &response) const override {
+	void work(Request &request, Response &response) const override {
 
+		switch(request.pop("modules","workers","factories",nullptr)) {
+		case 0:	// Modules
+			Module::getInfo(response);
+			break;
+
+		case 1:	// Workers
+			Worker::getInfo(response);
+			break;
+
+		case 2:	// Factories
+			Factory::getInfo(response);
+			break;
+
+		}
 
 	}
 
@@ -56,7 +72,7 @@
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
-	return new ::Module();
+	return new ::InfoModule();
  }
 
  bool udjat_module_deinit() {

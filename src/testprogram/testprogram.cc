@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
 	Module::load();
 
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
+	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
 	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
 
 	Udjat::run();
