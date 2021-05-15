@@ -30,7 +30,16 @@ int main(int argc, char **argv) {
 
 	setlocale( LC_ALL, "" );
 
-	Module::load("udjat-module-civetweb");
+	try {
+
+		Module::load("http");
+
+	} catch(const std::exception &e) {
+
+		cerr << "Can't load http worker: " << e.what() << endl;
+		exit(-1);
+	}
+
 	auto module = udjat_module_init();
 
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
