@@ -31,7 +31,6 @@ int main(int argc, char **argv) {
 	setlocale( LC_ALL, "" );
 
 	auto module = udjat_module_init();
-	Module::load();
 
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
 	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
@@ -41,5 +40,6 @@ int main(int argc, char **argv) {
 
 	cout << "Removing module" << endl;
 	delete module;
+
 	return 0;
 }

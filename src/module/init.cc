@@ -26,24 +26,20 @@
  using namespace Udjat;
  using namespace std;
 
+ static const Udjat::ModuleInfo moduleinfo {
+	PACKAGE_NAME,									// The module name.
+	"Module information exporter", 					// The module description.
+	PACKAGE_VERSION, 								// The module version.
+	PACKAGE_URL, 									// The package URL.
+	PACKAGE_BUGREPORT 								// The bugreport address.
+ };
+
  class InfoModule : public Udjat::Module, public Udjat::Worker {
  private:
 
  public:
 
- 	InfoModule() : Udjat::Module(Quark::getFromStatic("information")), Udjat::Worker(Quark::getFromStatic("info")) {
-
-		static const Udjat::ModuleInfo info{
-			PACKAGE_NAME,									// The module name.
-			"Module information exporter", 					// The module description.
-			PACKAGE_VERSION, 								// The module version.
-			PACKAGE_URL, 									// The package URL.
-			PACKAGE_BUGREPORT 								// The bugreport address.
-		};
-
-		this->Udjat::Module::info = this->Udjat::Worker::info = &info;
-		active = true; // This worker is always active.
-
+ 	InfoModule() : Udjat::Module(Quark::getFromStatic("information"),&moduleinfo), Udjat::Worker(Quark::getFromStatic("info"),&moduleinfo) {
  	};
 
  	virtual ~InfoModule() {
@@ -75,6 +71,3 @@
 	return new ::InfoModule();
  }
 
- bool udjat_module_deinit() {
-	return false;
- }
