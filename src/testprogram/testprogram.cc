@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 
 	setlocale( LC_ALL, "" );
 
+	Module::load("udjat-module-civetweb");
 	auto module = udjat_module_init();
 
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
@@ -40,6 +41,8 @@ int main(int argc, char **argv) {
 
 	cout << "Removing module" << endl;
 	delete module;
+
+	Module::unload();
 
 	return 0;
 }
