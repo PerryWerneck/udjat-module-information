@@ -22,6 +22,7 @@
  #include <udjat/worker.h>
  #include <udjat/request.h>
  #include <udjat/factory.h>
+ #include <udjat/url.h>
 
  using namespace Udjat;
  using namespace std;
@@ -47,7 +48,7 @@
 
 	void work(Request &request, Response &response) const override {
 
-		switch(request.pop("modules","workers","factories",nullptr)) {
+		switch(request.pop("modules","workers","factories","protocols",nullptr)) {
 		case 0:	// Modules
 			Module::getInfo(response);
 			break;
@@ -60,6 +61,9 @@
 			Factory::getInfo(response);
 			break;
 
+		case 3: // Protocols
+			URL::getInfo(response);
+			break;
 		}
 
 	}

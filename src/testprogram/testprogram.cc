@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
 	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
 	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
+	cout << "http://localhost:8989/api/1.0/info/protocols" << endl;
 
 	Udjat::run();
 
