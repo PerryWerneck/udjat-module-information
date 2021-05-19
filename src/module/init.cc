@@ -39,7 +39,7 @@
 
  public:
 
- 	InfoModule() : Udjat::Module(Quark::getFromStatic("information"),&moduleinfo), Udjat::Worker(Quark::getFromStatic("info"),&moduleinfo) {
+ 	InfoModule() : Udjat::Module("information",&moduleinfo), Udjat::Worker("info",&moduleinfo) {
  	};
 
  	virtual ~InfoModule() {
