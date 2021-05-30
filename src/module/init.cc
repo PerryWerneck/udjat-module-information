@@ -46,7 +46,10 @@
  	virtual ~InfoModule() {
  	}
 
-	void work(Request &request, Response &response) const override {
+	bool work(Request &request, Response &response) const override {
+
+		if(request != Request::Get)
+			return false;
 
 		switch(request.pop("modules","workers","factories","protocols",nullptr)) {
 		case 0:	// Modules
@@ -65,6 +68,8 @@
 			URL::getInfo(response);
 			break;
 		}
+
+		return true;
 
 	}
 
