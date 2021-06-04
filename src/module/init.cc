@@ -36,8 +36,6 @@
  };
 
  class InfoModule : public Udjat::Module, public Udjat::Worker {
- private:
-
  public:
 
  	InfoModule() : Udjat::Module("information",&moduleinfo), Udjat::Worker("info",&moduleinfo) {
@@ -46,10 +44,7 @@
  	virtual ~InfoModule() {
  	}
 
-	bool work(Request &request, Response &response) const override {
-
-		if(request != Request::Get)
-			return false;
+	void get(Request &request, Response &response) const override {
 
 		switch(request.pop("modules","workers","factories","protocols",nullptr)) {
 		case 0:	// Modules
@@ -68,8 +63,6 @@
 			URL::getInfo(response);
 			break;
 		}
-
-		return true;
 
 	}
 
