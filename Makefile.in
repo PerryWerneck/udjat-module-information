@@ -151,7 +151,8 @@ $(BINRLS)/$(PACKAGE_NAME).so: \
 #---[ Install Targets ]------------------------------------------------------------------
 
 install: \
-	install-linux-module
+	install-linux-module \
+	install-conf
 
 install-linux-module: \
 	$(BINRLS)/$(PACKAGE_NAME).so
@@ -163,16 +164,31 @@ install-linux-module: \
 		$(BINRLS)/$(PACKAGE_NAME).so \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME).so
 		
+install-conf:
+
+	@$(MKDIR) \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d
+		
+	@$(INSTALL_DATA) \
+		conf/50-info.conf \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
+
+		
 #---[ Uninstall Targets ]----------------------------------------------------------------
 
 uninstall: \
-	uninstall-linux-lib
+	uninstall-linux-lib \
+	uninstall-conf
 
 uninstall-linux-lib:
 
 	@rm -f \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME).so
 		
+uninstall-conf:
+
+	@rm -f \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d 50-info.conf
 
 #---[ Debug Targets ]--------------------------------------------------------------------
 
