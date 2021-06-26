@@ -44,7 +44,7 @@
  	virtual ~InfoModule() {
  	}
 
-	void get(Request &request, Response &response) const override {
+	bool get(Request &request, Response &response) const override {
 
 		switch(request.pop("modules","workers","factories","protocols",nullptr)) {
 		case 0:	// Modules
@@ -62,8 +62,12 @@
 		case 3: // Protocols
 			URL::getInfo(response);
 			break;
+
+		default:
+			throw system_error(ENOENT,system_category(),"Invalid module name");
 		}
 
+		return true;
 	}
 
  };
