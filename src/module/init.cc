@@ -23,57 +23,58 @@
  #include <udjat/request.h>
  #include <udjat/factory.h>
  #include <udjat/url.h>
+ #include <system_error>
 
- using namespace Udjat;
  using namespace std;
-
- static const Udjat::ModuleInfo moduleinfo {
-	PACKAGE_NAME,									// The module name.
-	"Module information exporter", 					// The module description.
-	PACKAGE_VERSION, 								// The module version.
-	PACKAGE_URL, 									// The package URL.
-	PACKAGE_BUGREPORT 								// The bugreport address.
- };
-
- class InfoModule : public Udjat::Module, public Udjat::Worker {
- public:
-
- 	InfoModule() : Udjat::Module("information",&moduleinfo), Udjat::Worker("info",&moduleinfo) {
- 	};
-
- 	virtual ~InfoModule() {
- 	}
-
-	bool get(Request &request, Response &response) const override {
-
-		switch(request.pop("modules","workers","factories","protocols",nullptr)) {
-		case 0:	// Modules
-			Module::getInfo(response);
-			break;
-
-		case 1:	// Workers
-			Worker::getInfo(response);
-			break;
-
-		case 2:	// Factories
-			Factory::getInfo(response);
-			break;
-
-		case 3: // Protocols
-			URL::getInfo(response);
-			break;
-
-		default:
-			throw system_error(ENOENT,system_category(),"Invalid module name");
-		}
-
-		return true;
-	}
-
- };
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
-	return new ::InfoModule();
+
+	static const Udjat::ModuleInfo moduleinfo {
+		PACKAGE_NAME,									// The module name.
+		"Module information exporter", 					// The module description.
+		PACKAGE_VERSION, 								// The module version.
+		PACKAGE_URL, 									// The package URL.
+		PACKAGE_BUGREPORT 								// The bugreport address.
+	};
+
+	class Module : public Udjat::Module, public Udjat::Worker {
+	public:
+
+		Module() : Udjat::Module("information",&moduleinfo), Udjat::Worker("info",&moduleinfo) {
+		};
+
+		virtual ~Module() {
+		}
+
+		bool get(Udjat::Request &request, Udjat::Response &response) const override {
+
+			switch(request.getAction("modules","workers","factories","protocols",nullptr)) {
+			case 0:	// Modules
+				Udjat::Module::getInfo(response);
+				break;
+
+			case 1:	// Workers
+				Udjat::Worker::getInfo(response);
+				break;
+
+			case 2:	// Factories
+				Udjat::Factory::getInfo(response);
+				break;
+
+			case 3: // Protocols
+				Udjat::URL::getInfo(response);
+				break;
+
+			default:
+				throw system_error(ENOENT,system_category(),"Unknown action");
+			}
+
+			return true;
+		}
+
+	};
+
+	return new Module();
  }
 
