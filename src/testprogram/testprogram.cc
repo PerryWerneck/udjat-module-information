@@ -19,6 +19,8 @@
 
  #include <udjat.h>
  #include <udjat/module.h>
+ #include <udjat/tools/mainloop.h>
+
  #include <unistd.h>
 
  using namespace std;
@@ -47,7 +49,7 @@ int main(int argc, char **argv) {
 	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
 	cout << "http://localhost:8989/api/1.0/info/protocols" << endl;
 
-	Udjat::run();
+	Udjat::MainLoop::getInstance().run();
 
 	cout << "Removing module" << endl;
 	delete module;
