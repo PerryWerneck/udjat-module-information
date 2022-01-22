@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
 	try {
 
-		Module::load("http");
+		Module::load("http",false);
 
 	} catch(const std::exception &e) {
 
