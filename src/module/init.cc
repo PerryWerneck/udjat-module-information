@@ -22,7 +22,7 @@
  #include <udjat/worker.h>
  #include <udjat/request.h>
  #include <udjat/factory.h>
- #include <udjat/tools/url.h>
+ #include <udjat/tools/protocol.h>
  #include <system_error>
 
  using namespace std;
@@ -63,7 +63,7 @@
 				break;
 
 			case 3: // Protocols
-				Udjat::URL::getInfo(response);
+				//Udjat::Protocol::getInfo(response);
 				break;
 
 			default:

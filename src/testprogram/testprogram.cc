@@ -17,9 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat.h>
  #include <udjat/module.h>
  #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/logger.h>
 
  #include <unistd.h>
 
@@ -32,9 +32,11 @@ int main(int argc, char **argv) {
 
 	setlocale( LC_ALL, "" );
 
+	Logger::redirect();
+
 	try {
 
-		Module::load("http");
+		Module::load("http",false);
 
 	} catch(const std::exception &e) {
 
@@ -44,10 +46,10 @@ int main(int argc, char **argv) {
 
 	auto module = udjat_module_init();
 
-	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
-	cout << "http://localhost:8989/api/1.0/info/protocols" << endl;
+	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
+	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
+	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+	cout << "http://localhost:8989/api/1.0/info/protocols.xml" << endl;
 
 	Udjat::MainLoop::getInstance().run();
 
