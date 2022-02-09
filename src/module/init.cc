@@ -24,24 +24,19 @@
  #include <udjat/factory.h>
  #include <udjat/tools/protocol.h>
  #include <system_error>
+ #include <udjat/moduleinfo.h>
 
  using namespace std;
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
 
-	static const Udjat::ModuleInfo moduleinfo {
-		PACKAGE_NAME,									// The module name.
-		"Module information exporter", 					// The module description.
-		PACKAGE_VERSION, 								// The module version.
-		PACKAGE_URL, 									// The package URL.
-		PACKAGE_BUGREPORT 								// The bugreport address.
-	};
+	static const Udjat::ModuleInfo moduleinfo { "Module information exporter" };
 
 	class Module : public Udjat::Module, public Udjat::Worker {
 	public:
 
-		Module() : Udjat::Module("information",&moduleinfo), Udjat::Worker("info",&moduleinfo) {
+		Module() : Udjat::Module("information",moduleinfo), Udjat::Worker("info",moduleinfo) {
 		};
 
 		virtual ~Module() {
