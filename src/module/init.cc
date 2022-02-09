@@ -25,6 +25,7 @@
  #include <udjat/tools/protocol.h>
  #include <system_error>
  #include <udjat/moduleinfo.h>
+ #include <udjat/tools/mainloop.h>
 
  using namespace std;
 
@@ -44,7 +45,7 @@
 
 		bool get(Udjat::Request &request, Udjat::Response &response) const override {
 
-			switch(request.getAction("modules","workers","factories","protocols",nullptr)) {
+			switch(request.getAction("modules","workers","factories","protocols","services",nullptr)) {
 			case 0:	// Modules
 				Udjat::Module::getInfo(response);
 				break;
@@ -58,7 +59,11 @@
 				break;
 
 			case 3: // Protocols
-				//Udjat::Protocol::getInfo(response);
+				Udjat::Protocol::getInfo(response);
+				break;
+
+			case 4: // Services
+				Udjat::MainLoop::Service::getInfo(response);
 				break;
 
 			default:
