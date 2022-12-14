@@ -37,6 +37,7 @@
 		<Linker>
 			<Add option="`pkg-config --libs libudjat`" />
 		</Linker>
+		<Unit filename="src/include/config.h" />
 		<Unit filename="src/module/init.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />
 		<Extensions />
