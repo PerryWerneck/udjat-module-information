@@ -32,7 +32,7 @@
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
 
-	static const Udjat::ModuleInfo moduleinfo { "Module information exporter" };
+	static const Udjat::ModuleInfo moduleinfo { "Module information" };
 
 	class Module : public Udjat::Module, public Udjat::Worker {
 	public:
@@ -71,6 +71,16 @@
 			}
 
 			return true;
+		}
+
+		bool getProperty(const char *key, std::string &value) const noexcept override {
+
+			if(!strcasecmp(key,"options")) {
+				value = "modules,workers,factories,protocols,services";
+				return true;
+			}
+
+			return Udjat::Module::getProperty(key,value);
 		}
 
 	};
