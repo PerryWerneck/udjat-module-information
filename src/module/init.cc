@@ -28,6 +28,17 @@
  #include <udjat/tools/mainloop.h>
 
  using namespace std;
+ using namespace Udjat;
+
+ /// @brief Template to enumerate children with their properties.
+ template<class T>
+ inline void children_properties(Udjat::Response &response) {
+	response.reset(Value::Array);
+	T::for_each([&response](const T &object){
+		object.getProperties(response.append(Value::Object));
+		return false;
+	});
+ }
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
@@ -45,25 +56,26 @@
 
 		bool get(Udjat::Request &request, Udjat::Response &response) const override {
 
+
 			switch(request.getAction("modules","workers","factories","protocols","services",nullptr)) {
 			case 0:	// Modules
-				Udjat::Module::getInfo(response);
+				children_properties<Udjat::Module>(response);
 				break;
 
 			case 1:	// Workers
-				Udjat::Worker::getInfo(response);
+				children_properties<Udjat::Worker>(response);
 				break;
 
 			case 2:	// Factories
-				Udjat::Factory::getInfo(response);
+				children_properties<Udjat::Factory>(response);
 				break;
 
 			case 3: // Protocols
-				Udjat::Protocol::getInfo(response);
+				// children_properties<Udjat::Protocol>(response);
 				break;
 
 			case 4: // Services
-				Udjat::MainLoop::Service::getInfo(response);
+				// children_properties<Udjat::MainLoop::Service>(response);
 				break;
 
 			default:
