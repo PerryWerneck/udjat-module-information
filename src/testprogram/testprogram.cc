@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
 
 	setlocale( LC_ALL, "" );
 
+	Logger::verbosity(9);
 	Logger::redirect();
 
 	try {
