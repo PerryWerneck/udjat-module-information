@@ -37,26 +37,30 @@ int main(int argc, char **argv) {
 
 	try {
 
-		Module::load("http",false);
+		cout << "Loading civetweb" << endl;
+		Module::load("civetweb",true);
 
 	} catch(const std::exception &e) {
 
-		cerr << "Can't load http worker: " << e.what() << endl;
+		cerr << "Can't load http server module: " << e.what() << endl;
 		exit(-1);
 	}
 
-	auto module = udjat_module_init();
+	if(!udjat_module_init()) {
+		return -1;
+	}
 
+	/*
 	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
 	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
 	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
 	cout << "http://localhost:8989/api/1.0/info/protocols.xml" << endl;
 	cout << "http://localhost:8989/api/1.0/info/services.xml" << endl;
+	*/
 
 	Udjat::MainLoop::getInstance().run();
 
 	cout << "Removing module" << endl;
-	delete module;
 
 	Module::unload();
 

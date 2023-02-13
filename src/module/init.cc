@@ -34,29 +34,28 @@
  using namespace std;
  using namespace Udjat;
 
- /// @brief Template to enumerate children with their properties.
+ /// @brief Show class or object properties.
  template<class T>
- inline void children_properties(Udjat::Response &response) {
-	response.reset(Value::Array);
-	T::for_each([&response](const T &object){
-		object.getProperties(response.append(Value::Object));
-		return false;
-	});
- }
+ inline void show_properties(Udjat::Request &request, Udjat::Response &response) {
 
- /// @brief Template to get child properies by request.
- template<class T>
- inline void child_properties(Udjat::Request &request, Udjat::Response &response) {
+ 	if(request.empty()) {
 
-	std::string name;
-	request.pop(name);
+		response.reset(Value::Array);
+		T::for_each([&response](const T &object){
+			object.getProperties(response.append(Value::Object));
+			return false;
+		});
 
-	const T *object = T::find(name.c_str());
-	if(!object) {
-		throw system_error(ENOENT,system_category(),"Not found");
-	}
+ 	} else {
 
-	object->getProperties(response);
+		auto object = T::find(request.getPath());
+		if(!object) {
+			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.getPath()});
+		} else {
+			object->getProperties(response);
+		}
+
+ 	}
 
  }
 
@@ -77,52 +76,29 @@
 
 		bool get(Udjat::Request &request, Udjat::Response &response) const override {
 
-			auto action = request.getAction();
+			switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
+			case 0: // modules
+				show_properties<Udjat::Module>(request, response);
+				break;
 
-			if(!strcasecmp(action.c_str(),"modules")) {
+			case 1: // workers
+				show_properties<Udjat::Worker>(request, response);
+				break;
 
-				children_properties<Udjat::Module>(response);
+			case 2: // factories
+				show_properties<Udjat::Factory>(request, response);
+				break;
 
-			} else if(!strcasecmp(action.c_str(),"workers")) {
+			case 3: // protocols
+				show_properties<Udjat::Protocol>(request, response);
+				break;
 
-				children_properties<Udjat::Worker>(response);
+			case 4: // services
+				show_properties<Udjat::Service>(request, response);
+				break;
 
-			} else if(!strcasecmp(action.c_str(),"factories")) {
-
-				children_properties<Udjat::Factory>(response);
-
-			} else if(!strcasecmp(action.c_str(),"protocols"))  {
-
-				children_properties<Udjat::Protocol>(response);
-
-			} else if(!strcasecmp(action.c_str(),"services"))  {
-
-				children_properties<Udjat::Service>(response);
-
-			} else if(!strcasecmp(action.c_str(),"module")) {
-
-				child_properties<Udjat::Module>(request,response);
-
-			} else if(!strcasecmp(action.c_str(),"worker")) {
-
-				child_properties<Udjat::Worker>(request,response);
-
-			} else if(!strcasecmp(action.c_str(),"factory")) {
-
-				child_properties<Udjat::Factory>(request,response);
-
-			} else if(!strcasecmp(action.c_str(),"protocol"))  {
-
-				child_properties<Udjat::Protocol>(request,response);
-
-			} else if(!strcasecmp(action.c_str(),"service"))  {
-
-				// child_properties<Udjat::Service>(request,response);
-
-			} else {
-
+			default:
 				throw system_error(ENOENT,system_category(),"Not implemented");
-
 			}
 
 			return true;
@@ -131,7 +107,7 @@
 		bool getProperty(const char *key, std::string &value) const noexcept override {
 
 			if(!strcasecmp(key,"options")) {
-				value = Config::Value<std::string>("information","allowed","modules,workers,factories,protocols,services");
+				value = Config::Value<std::string>("information","paths","modules,workers,factories,protocols,services");
 				return true;
 			}
 
