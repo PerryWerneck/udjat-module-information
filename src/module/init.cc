@@ -18,16 +18,47 @@
  */
 
  #include <config.h>
- #include <udjat/module.h>
  #include <udjat/worker.h>
  #include <udjat/request.h>
  #include <udjat/factory.h>
- #include <udjat/tools/protocol.h>
  #include <system_error>
  #include <udjat/moduleinfo.h>
  #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/request.h>
+
+ #include <udjat/module.h>
+ #include <udjat/tools/protocol.h>
 
  using namespace std;
+ using namespace Udjat;
+
+ /// @brief Show class or object properties.
+ template<class T>
+ inline void show_properties(Udjat::Request &request, Udjat::Response &response) {
+
+ 	if(request.empty()) {
+
+		response.reset(Value::Array);
+		T::for_each([&response](const T &object){
+			object.getProperties(response.append(Value::Object));
+			return false;
+		});
+
+ 	} else {
+
+		auto object = T::find(request.getPath());
+		if(!object) {
+			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.getPath()});
+		} else {
+			object->getProperties(response);
+		}
+
+ 	}
+
+ }
+
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
@@ -45,29 +76,29 @@
 
 		bool get(Udjat::Request &request, Udjat::Response &response) const override {
 
-			switch(request.getAction("modules","workers","factories","protocols","services",nullptr)) {
-			case 0:	// Modules
-				Udjat::Module::getInfo(response);
+			switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
+			case 0: // modules
+				show_properties<Udjat::Module>(request, response);
 				break;
 
-			case 1:	// Workers
-				Udjat::Worker::getInfo(response);
+			case 1: // workers
+				show_properties<Udjat::Worker>(request, response);
 				break;
 
-			case 2:	// Factories
-				Udjat::Factory::getInfo(response);
+			case 2: // factories
+				show_properties<Udjat::Factory>(request, response);
 				break;
 
-			case 3: // Protocols
-				Udjat::Protocol::getInfo(response);
+			case 3: // protocols
+				show_properties<Udjat::Protocol>(request, response);
 				break;
 
-			case 4: // Services
-				Udjat::MainLoop::Service::getInfo(response);
+			case 4: // services
+				show_properties<Udjat::Service>(request, response);
 				break;
 
 			default:
-				throw system_error(ENOENT,system_category(),"Unknown action");
+				throw system_error(ENOENT,system_category(),"Not implemented");
 			}
 
 			return true;
@@ -76,7 +107,7 @@
 		bool getProperty(const char *key, std::string &value) const noexcept override {
 
 			if(!strcasecmp(key,"options")) {
-				value = "modules,workers,factories,protocols,services";
+				value = Config::Value<std::string>("information","paths","modules,workers,factories,protocols,services");
 				return true;
 			}
 
