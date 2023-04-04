@@ -1,4 +1,4 @@
-name: MSYS2
+name: MinGW
 on:
   pull_request:
     branches:
