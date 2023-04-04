@@ -7,7 +7,7 @@ Implements a libudjat worker (for httpd and other services) showing the internal
 [![build result](https://build.opensuse.org/projects/home:PerryWerneck:udjat/packages/udjat-module-information/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:PerryWerneck:udjat/udjat-module-information)
 
 
-## Example (using civetweb module as exporter):
+## Example (using [civetweb module](../../../udjat-module-civetweb) as http exporter):
 
 http://127.0.0.1:8989/api/1.0/info/modules.xml
 
