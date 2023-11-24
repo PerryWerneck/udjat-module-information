@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -17,52 +17,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #include <config.h>
+ #include <udjat/tools/application.h>
  #include <udjat/module.h>
- #include <udjat/tools/mainloop.h>
- #include <udjat/tools/logger.h>
-
  #include <unistd.h>
+ #include <udjat/tools/logger.h>
 
  using namespace std;
  using namespace Udjat;
 
-//---[ Implement ]------------------------------------------------------------------------------------------
-
-int main(int argc, char **argv) {
-
-	setlocale( LC_ALL, "" );
+ int main(int argc, char **argv) {
 
 	Logger::verbosity(9);
 	Logger::redirect();
 
-	try {
+	udjat_module_init();
 
-		cout << "Loading civetweb" << endl;
-		Module::load("civetweb",true);
+	auto rc = Application{}.run(argc,argv,"./test.xml");
 
-	} catch(const std::exception &e) {
+	debug("Application exits with rc=",rc);
 
-		cerr << "Can't load http server module: " << e.what() << endl;
-		exit(-1);
-	}
-
-	if(!udjat_module_init()) {
-		return -1;
-	}
-
-	/*
-	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/protocols.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/services.xml" << endl;
-	*/
-
-	Udjat::MainLoop::getInstance().run();
-
-	cout << "Removing module" << endl;
-
-	Module::unload();
-
-	return 0;
+	return rc;
 }
