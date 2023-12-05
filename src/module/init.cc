@@ -36,7 +36,7 @@
 
  /// @brief Show class or object properties.
  template<class T>
- inline void show_properties(Udjat::Request &request, Udjat::Response &response) {
+ inline void show_properties(Udjat::Request &request, Udjat::Response::Value &response) {
 
  	if(request.empty()) {
 
@@ -48,9 +48,9 @@
 
  	} else {
 
-		auto object = T::find(request.getPath());
+		auto object = T::find(request.path());
 		if(!object) {
-			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.getPath()});
+			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.path()});
 		} else {
 			object->getProperties(response);
 		}
@@ -74,7 +74,13 @@
 		virtual ~Module() {
 		}
 
-		bool get(Udjat::Request &request, Udjat::Response &response) const override {
+		bool get(Udjat::Request &request, Udjat::Response::Value &response) const override {
+
+			debug("path='",request.path(),"'");
+
+			if(request.empty()) {
+				throw system_error(EINVAL,system_category(),"Request should be in the format /api/version/info/{identifier}");
+			}
 
 			switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
 			case 0: // modules
