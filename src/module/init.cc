@@ -26,7 +26,7 @@
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
- #include <udjat/request.h>
+ #include <udjat/tools/request.h>
 
  #include <udjat/module.h>
  #include <udjat/tools/protocol.h>
@@ -38,7 +38,11 @@
  template<class T>
  inline void show_properties(Udjat::Request &request, Udjat::Response::Value &response) {
 
- 	if(request.empty()) {
+	string path{request.pop()};
+
+	debug("path='",path,"'");
+
+ 	if(path.empty()) {
 
 		response.reset(Value::Array);
 		T::for_each([&response](const T &object){
@@ -50,7 +54,7 @@
 
 		auto object = T::find(request.path());
 		if(!object) {
-			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.path()});
+			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.c_str()});
 		} else {
 			object->getProperties(response);
 		}
