@@ -52,11 +52,16 @@
 
  	} else {
 
-		auto object = T::find(request.path());
-		if(!object) {
+		if(!T::for_each([&path,&request,&response](const T &object) {
+
+			if(object == path.c_str()) {
+				object.getProperties(response);
+				return true;
+			}
+
+			return false;
+		})) {
 			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.c_str()});
-		} else {
-			object->getProperties(response);
 		}
 
  	}
