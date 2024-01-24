@@ -86,7 +86,7 @@
 		void trace_paths(const char *url_prefix) const noexcept override {
 
 			for(string &value : Config::Value<std::vector<std::string>>("information","paths","modules,workers,factories,protocols,services")) {
-				Logger::String{"Service info available on ",url_prefix,value.c_str()}.trace("info");
+				Logger::String{"Service info available on ",url_prefix,"info/",value.c_str()}.trace("info");
 			}
 
 		}
