@@ -17,52 +17,79 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat/module.h>
- #include <udjat/tools/mainloop.h>
+ #include <config.h>
  #include <udjat/tools/logger.h>
-
- #include <unistd.h>
+ #include <udjat/tools/application.h>
+ #include <udjat/moduleinfo.h>
+ #include <udjat/module.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/factory.h>
 
  using namespace std;
  using namespace Udjat;
 
 //---[ Implement ]------------------------------------------------------------------------------------------
 
-int main(int argc, char **argv) {
+ static const ModuleInfo moduleinfo{"infomodule-tester"};
 
-	setlocale( LC_ALL, "" );
+ class RandomFactory : public Udjat::Factory {
+ public:
+	RandomFactory() : Udjat::Factory("random",moduleinfo) {
+		cout << "random agent factory was created" << endl;
+		srand(time(NULL));
+	}
 
-	Logger::verbosity(9);
+	std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &, const pugi::xml_node &node) const override {
+
+		class RandomAgent : public Agent<unsigned int> {
+		private:
+			unsigned int limit = 5;
+
+		public:
+			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
+				cout << "Building random Agent" << endl;
+			}
+
+			bool refresh() override {
+				set( ((unsigned int) rand()) % limit);
+				return true;
+			}
+
+			void get(const Request &, Response::Table &report) {
+
+				report.start("sample","row","a","b","c",nullptr);
+
+				for(size_t row = 0; row < 3; row++) {
+					string r{"r"};
+					r += std::to_string(row);
+
+					report << (string{"["} +r + "]");
+					for(size_t col = 0; col < 3;col++) {
+						report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
+					}
+				}
+
+			}
+
+		};
+
+		return make_shared<RandomAgent>(node);
+
+	}
+
+ };
+
+ int main(int argc, char **argv) {
+
+ 	Logger::verbosity(9);
 	Logger::redirect();
 
-	try {
+	RandomFactory factory;
+ 	udjat_module_init();
+	auto rc = Application{}.run(argc,argv,"./test.xml");
 
-		cout << "Loading civetweb" << endl;
-		Module::load("civetweb",true);
+	debug("Application exits with rc=",rc);
 
-	} catch(const std::exception &e) {
+	return rc;
 
-		cerr << "Can't load http server module: " << e.what() << endl;
-		exit(-1);
-	}
-
-	if(!udjat_module_init()) {
-		return -1;
-	}
-
-	/*
-	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/protocols.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/services.xml" << endl;
-	*/
-
-	Udjat::MainLoop::getInstance().run();
-
-	cout << "Removing module" << endl;
-
-	Module::unload();
-
-	return 0;
-}
+ }

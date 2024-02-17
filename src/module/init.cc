@@ -26,7 +26,7 @@
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
- #include <udjat/request.h>
+ #include <udjat/tools/request.h>
 
  #include <udjat/module.h>
  #include <udjat/tools/protocol.h>
@@ -36,9 +36,13 @@
 
  /// @brief Show class or object properties.
  template<class T>
- inline void show_properties(Udjat::Request &request, Udjat::Response &response) {
+ inline void show_properties(Udjat::Request &request, Udjat::Response::Value &response) {
 
- 	if(request.empty()) {
+	string path{request.pop()};
+
+	debug("path='",path,"'");
+
+ 	if(path.empty()) {
 
 		response.reset(Value::Array);
 		T::for_each([&response](const T &object){
@@ -48,11 +52,16 @@
 
  	} else {
 
-		auto object = T::find(request.getPath());
-		if(!object) {
-			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.getPath()});
-		} else {
-			object->getProperties(response);
+		if(!T::for_each([&path,&request,&response](const T &object) {
+
+			if(object == path.c_str()) {
+				object.getProperties(response);
+				return true;
+			}
+
+			return false;
+		})) {
+			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.c_str()});
 		}
 
  	}
@@ -74,7 +83,21 @@
 		virtual ~Module() {
 		}
 
-		bool get(Udjat::Request &request, Udjat::Response &response) const override {
+		void trace_paths(const char *url_prefix) const noexcept override {
+
+			for(string &value : Config::Value<std::vector<std::string>>("information","paths","modules,workers,factories,protocols,services")) {
+				Logger::String{"Service info available on ",url_prefix,"info/",value.c_str()}.trace("info");
+			}
+
+		}
+
+		bool get(Udjat::Request &request, Udjat::Response::Value &response) const override {
+
+			debug("path='",request.path(),"'");
+
+			if(request.empty()) {
+				throw system_error(EINVAL,system_category(),"Request should be in the format /api/version/info/{identifier}");
+			}
 
 			switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
 			case 0: // modules
