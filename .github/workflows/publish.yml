@@ -1,12 +1,11 @@
-name: check-msys2
+name: Publish
 on:
   push:
     branches: [ "win" ]
-  pull_request:
-    branches: [ "master" ]
-
+    tags: [ "*" ]
+  
 jobs:
-  msys2-build:
+  mingw-publish:
     runs-on: windows-latest
     defaults:
       run:
@@ -33,4 +32,14 @@ jobs:
           pacman -U --noconfirm *.pkg.tar.zst
           dos2unix PKGBUILD.mingw
           makepkg BUILDDIR=/tmp/pkg -p PKGBUILD.mingw
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.gettag.outputs.tag }}
+          artifacts: "*udjat*.pkg.tar.zst"
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          omitBody: true
+          omitPrereleaseDuringUpdate: true
+          replacesArtifacts: true
 
