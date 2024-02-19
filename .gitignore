@@ -61,4 +61,5 @@ valgrind.suppression
 
 # Personal Notes
 *.[0-9]
+vgcore.*
 
