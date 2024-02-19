@@ -15,7 +15,7 @@ jobs:
       - uses: oprypin/find-latest-tag@v1
         id: gettag
         with:
-          repository: PerryWerneck/libudjat
+          repository: PerryWerneck/udjat-module-information
           releases-only: true
       - uses: msys2/setup-msys2@v2
         with:
