@@ -19,15 +19,14 @@
 
  #include <config.h>
  #include <udjat/worker.h>
- #include <udjat/request.h>
  #include <udjat/factory.h>
  #include <system_error>
  #include <udjat/moduleinfo.h>
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/request.h>
-
+ #include <udjat/tools/interface.h>
+ 
  #include <udjat/module.h>
  #include <udjat/tools/protocol.h>
 
@@ -36,48 +35,23 @@
 
  /// @brief Show class or object properties.
  template<class T>
- inline void show_properties(Udjat::Request &request, Udjat::Response::Value &response) {
-
-	string path{request.pop()};
-
-	debug("path='",path,"'");
-
- 	if(path.empty()) {
-
-		response.reset(Value::Array);
-		T::for_each([&response](const T &object){
-			object.getProperties(response.append(Value::Object));
-			return false;
-		});
-
- 	} else {
-
-		if(!T::for_each([&path,&request,&response](const T &object) {
-
-			if(object == path.c_str()) {
-				object.getProperties(response);
-				return true;
-			}
-
-			return false;
-		})) {
-			throw system_error(ENOENT,system_category(),Logger::Message{"Cant find '{}'",request.c_str()});
-		}
-
- 	}
-
+ inline void show_properties(Udjat::Value &response) {
+	response.reset(Value::Array);
+	T::for_each([&response](const T &object){
+		object.getProperties(response.append(Value::Object));
+		return false;
+	});
  }
-
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
 
 	static const Udjat::ModuleInfo moduleinfo { "Module information" };
 
-	class Module : public Udjat::Module, public Udjat::Worker {
+	class Module : public Udjat::Module, public Udjat::Interface {
 	public:
 
-		Module() : Udjat::Module("information",moduleinfo), Udjat::Worker("info",moduleinfo) {
+		Module() : Udjat::Module("information",moduleinfo), Udjat::Interface("appinfo") {
 		};
 
 		virtual ~Module() {
@@ -91,40 +65,37 @@
 
 		}
 
-		bool get(Udjat::Request &request, Udjat::Response::Value &response) const override {
+		bool for_each(const std::function<bool(const size_t index, bool input, const char *name, const Value::Type type)> &) const override {
+			return false;	
+		}
 
-			debug("path='",request.path(),"'");
+		void call(const char *path, Udjat::Value &response) override  {
 
-			if(request.empty()) {
-				throw system_error(EINVAL,system_category(),"Request should be in the format /api/version/info/{identifier}");
-			}
-
-			switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
+			switch(String{path}.select("modules","workers","factories","protocols","services",nullptr)) {
 			case 0: // modules
-				show_properties<Udjat::Module>(request, response);
+				show_properties<Udjat::Module>(response);
 				break;
 
 			case 1: // workers
-				show_properties<Udjat::Worker>(request, response);
+				show_properties<Udjat::Worker>(response);
 				break;
 
 			case 2: // factories
-				show_properties<Udjat::Factory>(request, response);
+				show_properties<Udjat::Factory>(response);
 				break;
 
 			case 3: // protocols
-				show_properties<Udjat::Protocol>(request, response);
+				show_properties<Udjat::Protocol>(response);
 				break;
 
 			case 4: // services
-				show_properties<Udjat::Service>(request, response);
+				show_properties<Udjat::Service>(response);
 				break;
 
 			default:
 				throw system_error(ENOENT,system_category(),"Not implemented");
 			}
 
-			return true;
 		}
 
 		bool getProperty(const char *key, std::string &value) const noexcept override {
