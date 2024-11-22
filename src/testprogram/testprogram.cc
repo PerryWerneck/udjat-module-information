@@ -55,22 +55,6 @@
 				return true;
 			}
 
-			void get(const Request &, Response::Table &report) {
-
-				report.start("sample","row","a","b","c",nullptr);
-
-				for(size_t row = 0; row < 3; row++) {
-					string r{"r"};
-					r += std::to_string(row);
-
-					report << (string{"["} +r + "]");
-					for(size_t col = 0; col < 3;col++) {
-						report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
-					}
-				}
-
-			}
-
 		};
 
 		return make_shared<RandomAgent>(node);
