@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include <udjat/worker.h>
+ #include <udjat/tools/worker.h>
  #include <udjat/factory.h>
  #include <system_error>
  #include <udjat/moduleinfo.h>
