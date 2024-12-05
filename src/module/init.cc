@@ -77,35 +77,44 @@
 				int call(Udjat::Request &request, Udjat::Response &response, bool except) override {
 
 					return exec(response,except,[&](){
-
+						
+						debug("Request: '",request.path(),"'");
 						switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
 						case 0: // modules
+							debug("modules");
 							show_properties<Udjat::Module>(response);
 							break;
 
 						case 1: // workers
+							debug("workers");
 							show_properties<Udjat::Worker>(response);
 							break;
 
 						case 2: // factories
+							debug("factories");
 							show_properties<Udjat::Factory>(response);
 							break;
 
 						case 3: // protocols
+							debug("protocols");
 							show_properties<Udjat::Protocol>(response);
 							break;
 
 						case 4: // services
+							debug("services");
 							show_properties<Udjat::Service>(response);
 							break;
 
 						case -ENODATA:
+							debug("ENODATA");
 							throw system_error(ENODATA,system_category(),"An information path is required");
 
 						case -ENOENT:
+							debug("ENOENT");
 							throw system_error(ENOENT,system_category(),"Path not found");
 
 						default:
+							debug("EINVAL");
 							throw system_error(EINVAL,system_category(),"Unexpected path");
 						}
 
