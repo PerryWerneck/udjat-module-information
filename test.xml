@@ -4,5 +4,9 @@
 
 	<module name='civetweb' required='no' />
 
+	<interface type='web' name='info'>
+		<handler name='get' action-name='info' />
+	</interface>
+
 </config>
 

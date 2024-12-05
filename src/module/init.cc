@@ -25,7 +25,8 @@
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/interface.h>
+ #include <udjat/tools/action.h>
+ #include <udjat/tools/request.h>
  
  #include <udjat/module.h>
  #include <udjat/tools/protocol.h>
@@ -48,10 +49,10 @@
 
 	static const Udjat::ModuleInfo moduleinfo { "Module information" };
 
-	class Module : public Udjat::Module, public Udjat::Interface {
+	class Module : public Udjat::Module, public Udjat::Action::Factory {
 	public:
 
-		Module() : Udjat::Module("information",moduleinfo), Udjat::Interface("appinfo") {
+		Module() : Udjat::Module("information",moduleinfo), Udjat::Action::Factory("appinfo") {
 		};
 
 		virtual ~Module() {
@@ -65,6 +66,61 @@
 
 		}
 
+		std::shared_ptr<Action> ActionFactory(const XML::Node &node) const override {
+
+			class Action : public Udjat::Action {
+			public:
+
+				Action(const XML::Node &node) : Udjat::Action{node} {
+				}
+
+				int call(Udjat::Request &request, Udjat::Response &response, bool except) override {
+
+					return exec(response,except,[&](){
+
+						switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
+						case 0: // modules
+							show_properties<Udjat::Module>(response);
+							break;
+
+						case 1: // workers
+							show_properties<Udjat::Worker>(response);
+							break;
+
+						case 2: // factories
+							show_properties<Udjat::Factory>(response);
+							break;
+
+						case 3: // protocols
+							show_properties<Udjat::Protocol>(response);
+							break;
+
+						case 4: // services
+							show_properties<Udjat::Service>(response);
+							break;
+
+						case -ENODATA:
+							throw system_error(ENODATA,system_category(),"An information path is required");
+
+						case -ENOENT:
+							throw system_error(ENOENT,system_category(),"Path not found");
+
+						default:
+							throw system_error(EINVAL,system_category(),"Unexpected path");
+						}
+
+						return 0;
+					});
+
+				}
+
+			};
+
+			return make_shared<Action>(node);
+
+		}
+
+		/*
 		bool for_each(const std::function<bool(const size_t index, bool input, const char *name, const Value::Type type)> &) const override {
 			return false;	
 		}
@@ -97,6 +153,7 @@
 			}
 
 		}
+		*/
 
 		bool getProperty(const char *key, std::string &value) const noexcept override {
 

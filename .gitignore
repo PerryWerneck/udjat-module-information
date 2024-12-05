@@ -63,3 +63,4 @@ valgrind.suppression
 *.[0-9]
 vgcore.*
 
+.vscode
