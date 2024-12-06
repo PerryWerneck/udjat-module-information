@@ -23,10 +23,12 @@
  #include <system_error>
  #include <udjat/moduleinfo.h>
  #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/action.h>
  #include <udjat/tools/request.h>
+ #include <udjat/tools/intl.h>
  
  #include <udjat/module.h>
  #include <udjat/tools/protocol.h>
@@ -39,7 +41,7 @@
  inline void show_properties(Udjat::Value &response) {
 	response.reset(Value::Array);
 	T::for_each([&response](const T &object){
-		object.getProperties(response);
+		object.getProperties(response.append(Value::Object));
 		return false;
 	});
  }
@@ -83,7 +85,14 @@
 						debug("Request: '",request.path(),"'");
 						switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
 						case 0: // modules
+							debug("getting modules");
 							show_properties<Udjat::Module>(response);
+							debug("got modules as '",std::to_string((Value::Type) response),"'");
+#ifdef DEBUG
+							cout << endl;
+							response.serialize(cout);
+							cout << endl;
+#endif
 							break;
 
 						case 1: // workers
