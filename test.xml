@@ -4,7 +4,7 @@
 
 	<module name='civetweb' required='no' />
 
-	<interface type='web' action-name='info' />
+	<interface type='web' action-name='appinfo' />
 
 </config>
 

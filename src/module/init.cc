@@ -39,7 +39,7 @@
  inline void show_properties(Udjat::Value &response) {
 	response.reset(Value::Array);
 	T::for_each([&response](const T &object){
-		object.getProperties(response.append(Value::Object));
+		object.getProperties(response);
 		return false;
 	});
  }
@@ -77,11 +77,12 @@
 				int call(Udjat::Request &request, Udjat::Response &response, bool except) override {
 
 					return exec(response,except,[&](){
+
+						debug("Response type is '",std::to_string((Value::Type) response),"'");
 						
 						debug("Request: '",request.path(),"'");
 						switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
 						case 0: // modules
-							debug("modules");
 							show_properties<Udjat::Module>(response);
 							break;
 
