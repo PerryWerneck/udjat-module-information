@@ -29,8 +29,9 @@
  #include <udjat/tools/action.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/interface.h>
  
- #include <udjat/module.h>
+ #include <udjat/module/abstract.h>
  #include <udjat/tools/protocol.h>
 
  using namespace std;
@@ -62,7 +63,7 @@
 
 		void trace_paths(const char *url_prefix) const noexcept override {
 
-			for(string &value : Config::Value<std::vector<std::string>>("information","paths","modules,workers,factories,protocols,services")) {
+			for(string &value : Config::Value<std::vector<std::string>>("information","paths","modules,workers,factories,protocols,services,interfaces")) {
 				Logger::String{"Service info available on ",url_prefix,"info/",value.c_str()}.trace("info");
 			}
 
@@ -83,16 +84,10 @@
 						debug("Response type is '",std::to_string((Value::Type) response),"'");
 						
 						debug("Request: '",request.path(),"'");
-						switch(request.select("modules","workers","factories","protocols","services",nullptr)) {
+						switch(request.select("modules","workers","factories","protocols","services","interfaces",nullptr)) {
 						case 0: // modules
 							debug("getting modules");
-							show_properties<Udjat::Module>(response);
-							debug("got modules as '",std::to_string((Value::Type) response),"'");
-#ifdef DEBUG
-							cout << endl;
-							response.serialize(cout);
-							cout << endl;
-#endif
+							// show_properties<Udjat::Module>(response);
 							break;
 
 						case 1: // workers
@@ -113,6 +108,11 @@
 						case 4: // services
 							debug("services");
 							show_properties<Udjat::Service>(response);
+							break;
+
+						case 5: // interfaces
+							debug("interfaces");
+							show_properties<Udjat::Interface::Factory>(response);
 							break;
 
 						case -ENODATA:
